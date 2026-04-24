@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* BGP DDoS Detection — Dark design system. All colors HSL. */
+@layer base {
+  :root {
+    /* Deep dark theme */
+    --background: 222 30% 4%;
+    --foreground: 210 20% 96%;
+
+    --card: 222 25% 7%;
+    --card-foreground: 210 20% 96%;
+
+    --popover: 222 28% 6%;
+    --popover-foreground: 210 20% 96%;
+
+    /* Electric Blue — primary / info */
+    --primary: 215 100% 58%;
+    --primary-foreground: 222 40% 6%;
+    --primary-glow: 210 100% 65%;
+
+    --secondary: 222 22% 12%;
+    --secondary-foreground: 210 20% 92%;
+
+    --muted: 222 20% 11%;
+    --muted-foreground: 215 14% 60%;
+
+    /* Golden Yellow — focus / warning */
+    --accent: 45 96% 58%;
+    --accent-foreground: 222 40% 6%;
+
+    /* Crimson Red — under attack */
+    --destructive: 350 85% 55%;
+    --destructive-foreground: 210 20% 98%;
+
+    /* Status semantic */
+    --status-attack: 350 85% 55%;
+    --status-normal: 152 70% 48%;
+    --status-none: 215 10% 55%;
+    --status-warning: 45 96% 58%;
+
+    --border: 222 22% 14%;
+    --input: 222 22% 14%;
+    --ring: 215 100% 58%;
+
+    --radius: 1.25rem;
+
+    /* Gradients */
+    --gradient-primary: radial-gradient(circle at 30% 30%, hsl(215 100% 65% / 0.9), hsl(215 100% 45% / 0.95) 60%, hsl(222 60% 18%) 100%);
+    --gradient-bg: radial-gradient(ellipse at top, hsl(222 40% 9%) 0%, hsl(222 30% 4%) 60%);
+    --gradient-card: linear-gradient(180deg, hsl(222 25% 8% / 1) 0%, hsl(222 25% 6% / 1) 100%);
+
+    /* Shadows / glows */
+    --glow-primary: 0 0 60px hsl(215 100% 58% / 0.45);
+    --glow-accent: 0 0 40px hsl(45 96% 58% / 0.35);
+    --glow-attack: 0 0 40px hsl(350 85% 55% / 0.45);
+    --shadow-card: 0 8px 32px -8px hsl(222 60% 2% / 0.6);
+
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 222 30% 5%;
+    --sidebar-foreground: 210 18% 80%;
+    --sidebar-primary: 215 100% 58%;
+    --sidebar-primary-foreground: 222 40% 6%;
+    --sidebar-accent: 222 22% 10%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 222 22% 12%;
+    --sidebar-ring: 215 100% 58%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html, body, #root { @apply min-h-screen; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+    background: var(--gradient-bg);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4 { font-family: 'Bricolage Grotesque', sans-serif; }
+}
+
+@layer utilities {
+  .glow-primary { box-shadow: var(--glow-primary); }
+  .glow-accent { box-shadow: var(--glow-accent); }
+  .glow-attack { box-shadow: var(--glow-attack); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .gradient-primary { background: var(--gradient-primary); }
+  .gradient-card { background: var(--gradient-card); }
+  .text-balance { text-wrap: balance; }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(215 100% 58% / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(215 100% 58% / 0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+}
