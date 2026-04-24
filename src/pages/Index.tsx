@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PowerButton } from "@/components/scanner/PowerButton";
 import { ScanStatusBar } from "@/components/scanner/ScanStatusBar";
 import { IxTargetCard } from "@/components/scanner/IxTargetCard";
@@ -7,6 +7,7 @@ import { RedundancyGauge } from "@/components/dashboard/RedundancyGauge";
 import { TimelineHeatmap } from "@/components/dashboard/TimelineHeatmap";
 import { OperatorList } from "@/components/dashboard/OperatorList";
 import { DashboardControls } from "@/components/dashboard/DashboardControls";
+import { SnapshotSelector, ViewMode } from "@/components/dashboard/SnapshotSelector";
 import { DotSpotlight } from "@/components/backgrounds/DotSpotlight";
 import {
   DashboardFiltersProvider,
@@ -14,7 +15,9 @@ import {
 } from "@/context/DashboardFiltersContext";
 import { useScan } from "@/hooks/useScan";
 import { useResults, useStats } from "@/hooks/useResults";
+import { useSnapshots } from "@/hooks/useSnapshots";
 import type { Operator } from "@/data/mockData";
+import type { Snapshot } from "@/types/api";
 
 // Mapa de IXs selecionados (código UI) → nome completo da API
 const IX_MAP: Record<"MA" | "CE", string> = {
@@ -34,9 +37,22 @@ interface DashboardProps {
     redundancia_pct: number;
     top_mitigadores: { nome: string; quantidade: number }[];
   } | null;
+  mode: ViewMode;
+  onChangeMode: (m: ViewMode) => void;
+  latest: Snapshot | null;
+  totalSnapshots: number;
+  loading: boolean;
 }
 
-function Dashboard({ operators, stats }: DashboardProps) {
+function Dashboard({
+  operators,
+  stats,
+  mode,
+  onChangeMode,
+  latest,
+  totalSnapshots,
+  loading,
+}: DashboardProps) {
   const { filtered } = useDashboardFilters();
 
   const totalPrefixes = filtered.reduce((s, o) => s + o.prefixes24, 0);
@@ -59,7 +75,20 @@ function Dashboard({ operators, stats }: DashboardProps) {
 
   return (
     <section className="space-y-5 sm:space-y-6 animate-fade-in">
+      <SnapshotSelector
+        mode={mode}
+        onChange={onChangeMode}
+        latest={latest}
+        totalSnapshots={totalSnapshots}
+      />
+
       <DashboardControls />
+
+      {loading && (
+        <p className="text-[10px] tracking-[0.32em] text-muted-foreground text-center">
+          Carregando dados…
+        </p>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <KpiCard label="Mitigadores" value={topMitigators.length} hint="ASNs com mitigação ativa" accent="primary">
@@ -139,10 +168,22 @@ function Dashboard({ operators, stats }: DashboardProps) {
 export default function Index() {
   const [selected, setSelected] = useState<("MA" | "CE")[]>(["MA", "CE"]);
   const [hours, setHours] = useState(1);
+  const [viewMode, setViewMode] = useState<ViewMode>("latest");
 
   const { state: scan, iniciarScan, cancelarScan } = useScan();
-  const { operators } = useResults(scan.done ? scan.snapshotId : null);
-  const { stats } = useStats(scan.done ? scan.snapshotId : null);
+  const { snapshots, latest, refetch: refetchSnapshots } = useSnapshots();
+
+  // Quando uma coleta terminar, recarrega lista de snapshots para refletir o novo dado.
+  useEffect(() => {
+    if (scan.done) refetchSnapshots();
+  }, [scan.done, refetchSnapshots]);
+
+  // Resolve qual snapshot_id buscar conforme o modo selecionado.
+  const effectiveSnapshotId: number | "all" | null =
+    viewMode === "all" ? "all" : latest?.id ?? null;
+
+  const { operators, loading: loadingResults } = useResults(effectiveSnapshotId);
+  const { stats, loading: loadingStats } = useStats(effectiveSnapshotId);
 
   const toggle = (id: "MA" | "CE") =>
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
@@ -219,10 +260,18 @@ export default function Index() {
           />
         </section>
 
-        {/* Dashboard só após primeira coleta concluída */}
-        {scan.done ? (
+        {/* Dashboard sempre visível quando há ao menos uma coleta no banco */}
+        {snapshots.length > 0 ? (
           <DashboardFiltersProvider operators={operators}>
-            <Dashboard operators={operators} stats={stats} />
+            <Dashboard
+              operators={operators}
+              stats={stats}
+              mode={viewMode}
+              onChangeMode={setViewMode}
+              latest={latest}
+              totalSnapshots={snapshots.length}
+              loading={loadingResults || loadingStats}
+            />
           </DashboardFiltersProvider>
         ) : (
           <section className="rounded-3xl border border-dashed border-border/60 px-6 sm:px-8 py-10 sm:py-14 text-center">
@@ -230,7 +279,7 @@ export default function Index() {
               Painel analítico
             </p>
             <p className="text-sm text-muted-foreground/80 mt-2">
-              Inicie e finalize uma coleta para visualizar os KPIs e gráficos.
+              Aguardando a primeira coleta no banco. Inicie um scan acima ou aguarde o auto-scan (a cada 6h).
             </p>
           </section>
         )}

@@ -22,14 +22,14 @@ export function toOperator(r: ResultadoOperadora): Operator {
   };
 }
 
-export function useResults(snapshotId: number | null) {
+export function useResults(snapshotId: number | "all" | null) {
   const [operators, setOperators] = useState<Operator[]>([]);
   const [raw, setRaw] = useState<ResultadoOperadora[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!snapshotId) return;
+    if (snapshotId === null) return;
     setLoading(true);
     setError(null);
 
@@ -45,13 +45,13 @@ export function useResults(snapshotId: number | null) {
   return { operators, raw, loading, error };
 }
 
-export function useStats(snapshotId: number | null) {
+export function useStats(snapshotId: number | "all" | null) {
   const [stats, setStats] = useState<KpiData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!snapshotId) return;
+    if (snapshotId === null) return;
     setLoading(true);
     setError(null);
 

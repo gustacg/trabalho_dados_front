@@ -68,7 +68,7 @@ export async function getSnapshot(id: number): Promise<Snapshot> {
 // ── Results ───────────────────────────────────────────────────────────────────
 
 export async function getResults(
-  snapshotId: number,
+  snapshotId: number | "all",
   status?: string,
   ix?: string
 ): Promise<ResultadoOperadora[]> {
