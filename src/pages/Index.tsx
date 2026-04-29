@@ -16,6 +16,7 @@ import {
 import { useScan } from "@/hooks/useScan";
 import { useResults, useStats } from "@/hooks/useResults";
 import { useSnapshots } from "@/hooks/useSnapshots";
+import { getOperators } from "@/lib/api";
 import type { Operator } from "@/data/mockData";
 import type { Snapshot } from "@/types/api";
 
@@ -66,12 +67,12 @@ function Dashboard({
   const ceCount = filtered.filter((o) => o.ix === "IX Ceará").reduce((s, o) => s + o.prefixes24, 0);
   const maCount = filtered.filter((o) => o.ix === "IX Maranhão").reduce((s, o) => s + o.prefixes24, 0);
 
-  // Top mitigadores para exibição (usa dados da API se disponível)
-  const topMitigators = stats?.top_mitigadores?.slice(0, 3).map((m, i) => ({
+  const allMitigators = stats?.top_mitigadores ?? [];
+  const topMitigators = allMitigators.map((m, i) => ({
     asn: `#${i + 1}`,
     company: m.nome,
     count: m.quantidade,
-  })) ?? [];
+  }));
 
   return (
     <section className="space-y-5 sm:space-y-6 animate-fade-in">
@@ -91,12 +92,12 @@ function Dashboard({
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <KpiCard label="Mitigadores" value={topMitigators.length} hint="ASNs com mitigação ativa" accent="primary">
-          <ul className="space-y-1.5">
+        <KpiCard label="Mitigadores" value={allMitigators.length} hint="ASNs com mitigação ativa" accent="primary">
+          <ul className="space-y-1.5 max-h-28 overflow-y-auto pr-1">
             {topMitigators.map((m) => (
               <li key={m.asn} className="flex items-center justify-between text-[11px]">
                 <span className="font-mono text-foreground/80 tracking-wider truncate">{m.company}</span>
-                <span className="font-mono text-muted-foreground tabular-nums">{m.count}</span>
+                <span className="font-mono text-muted-foreground tabular-nums shrink-0 ml-2">{m.count}</span>
               </li>
             ))}
           </ul>
@@ -170,6 +171,15 @@ export default function Index() {
   const [hours, setHours] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>("latest");
 
+  const [ixCounts, setIxCounts] = useState<{ ma: number; ce: number }>({ ma: 0, ce: 0 });
+
+  useEffect(() => {
+    Promise.all([
+      getOperators("IX Maranhão"),
+      getOperators("IX Ceará"),
+    ]).then(([ma, ce]) => setIxCounts({ ma: ma.length, ce: ce.length })).catch(() => {});
+  }, []);
+
   const { state: scan, iniciarScan, cancelarScan } = useScan();
   const { snapshots, latest, refetch: refetchSnapshots } = useSnapshots();
 
@@ -198,9 +208,8 @@ export default function Index() {
     }
   };
 
-  // Contagens reais para os IxTargetCards (fallback para hardcoded se sem dados)
-  const maCount = operators.filter((o) => o.ix === "IX Maranhão").length || 65;
-  const ceCount = operators.filter((o) => o.ix === "IX Ceará").length || 105;
+  const maCount = ixCounts.ma;
+  const ceCount = ixCounts.ce;
 
   return (
     <>

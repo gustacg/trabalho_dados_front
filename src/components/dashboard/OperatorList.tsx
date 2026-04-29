@@ -1,5 +1,5 @@
 import { useDashboardFilters, SortKey } from "@/context/DashboardFiltersContext";
-import { OperatorStatus, operators as allOperators } from "@/data/mockData";
+import { OperatorStatus } from "@/data/mockData";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 const statusLabel: Record<OperatorStatus, { text: string; cls: string }> = {
@@ -41,14 +41,14 @@ function HeaderCell({
 }
 
 export function OperatorList() {
-  const { filtered } = useDashboardFilters();
+  const { filtered, total } = useDashboardFilters();
 
   return (
     <div className="rounded-3xl border border-border gradient-card shadow-card overflow-hidden">
       <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between border-b border-border/60">
         <p className="text-[10px] tracking-[0.32em] text-muted-foreground">Operadoras</p>
         <p className="text-[10px] tracking-[0.24em] text-muted-foreground tabular-nums">
-          {filtered.length} de {allOperators.length}
+          {filtered.length} de {total}
         </p>
       </div>
 

@@ -16,6 +16,7 @@ interface Ctx {
   sortDir: SortDir;
   setSort: (k: SortKey, d?: SortDir) => void;
   filtered: Operator[];
+  total: number;
 }
 
 const C = createContext<Ctx | null>(null);
@@ -70,8 +71,10 @@ export function DashboardFiltersProvider({ children, operators }: ProviderProps)
     return list;
   }, [operators, ix, statuses, search, sortKey, sortDir]);
 
+  const total = (operators ?? []).length;
+
   return (
-    <C.Provider value={{ ix, setIx, statuses, toggleStatus, search, setSearch, sortKey, sortDir, setSort, filtered }}>
+    <C.Provider value={{ ix, setIx, statuses, toggleStatus, search, setSearch, sortKey, sortDir, setSort, filtered, total }}>
       {children}
     </C.Provider>
   );
