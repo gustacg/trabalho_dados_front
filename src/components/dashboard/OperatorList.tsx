@@ -1,11 +1,11 @@
 import { useDashboardFilters, SortKey } from "@/context/DashboardFiltersContext";
 import { OperatorStatus } from "@/data/mockData";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, AlertTriangle } from "lucide-react";
 
 const statusLabel: Record<OperatorStatus, { text: string; cls: string }> = {
-  attack: { text: "Ataque", cls: "text-status-attack border-status-attack/30 bg-status-attack/5" },
+  attack: { text: "Padrão atípico", cls: "text-status-attack border-status-attack/30 bg-status-attack/5" },
   normal: { text: "Normal", cls: "text-status-normal border-status-normal/30 bg-status-normal/5" },
-  none: { text: "Sem mitigação", cls: "text-muted-foreground border-border bg-secondary/40" },
+  none:   { text: "Sem mitigação", cls: "text-muted-foreground border-border bg-secondary/40" },
 };
 
 function HeaderCell({
@@ -46,19 +46,23 @@ export function OperatorList() {
   return (
     <div className="rounded-3xl border border-border gradient-card shadow-card overflow-hidden">
       <div className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between border-b border-border/60">
-        <p className="text-[10px] tracking-[0.32em] text-muted-foreground">Operadoras</p>
+        <div>
+          <p className="text-[10px] tracking-[0.32em] text-muted-foreground">ASNs descobertos</p>
+          <p className="text-[9px] tracking-[0.18em] text-muted-foreground/70 mt-0.5">
+            Análise estatística — não acusatória
+          </p>
+        </div>
         <p className="text-[10px] tracking-[0.24em] text-muted-foreground tabular-nums">
           {filtered.length} de {total}
         </p>
       </div>
 
-      {/* Header (md+) */}
       <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 border-b border-border/40 bg-secondary/20">
         <div className="col-span-4">
-          <HeaderCell label="Operadora" sortable k="name" />
+          <HeaderCell label="Holder · ASN" sortable k="name" />
         </div>
         <div className="col-span-3">
-          <HeaderCell label="ASNs mitigadores" />
+          <HeaderCell label="Mitigadores" />
         </div>
         <div className="col-span-1 text-right">
           <HeaderCell label="/24" sortable k="prefixes24" align="right" className="w-full justify-end" />
@@ -72,7 +76,9 @@ export function OperatorList() {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-xs text-muted-foreground text-center py-10">Nenhuma operadora corresponde aos filtros.</p>
+        <p className="text-xs text-muted-foreground text-center py-10">
+          Nenhum ASN corresponde aos filtros (rode um scan se este for o primeiro acesso).
+        </p>
       ) : (
         <ul className="divide-y divide-border/40">
           {filtered.map((op) => {
@@ -85,12 +91,18 @@ export function OperatorList() {
                 : "bg-status-normal";
             return (
               <li key={op.id} className="hover:bg-secondary/30 transition-colors">
-                {/* Desktop row */}
                 <div className="hidden md:grid grid-cols-12 items-center gap-4 px-6 py-4">
                   <div className="col-span-4 min-w-0">
-                    <p className="font-medium tracking-wide truncate">{op.name}</p>
-                    <p className="text-[10px] tracking-[0.16em] text-muted-foreground truncate mt-0.5">
-                      {op.ix}
+                    <p className="font-medium tracking-wide truncate flex items-center gap-2">
+                      {op.name}
+                      {op.hasMixedMitigator && (
+                        <span title="Inclui mitigador 'misto' (também trânsito) — leitura com cautela">
+                          <AlertTriangle className="h-3 w-3 text-accent" />
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-[10px] tracking-[0.16em] text-muted-foreground truncate mt-0.5 font-mono">
+                      AS{op.asn} · {op.estado || "—"} · {op.regiao || ""}
                     </p>
                   </div>
 
@@ -101,7 +113,7 @@ export function OperatorList() {
                       op.mitigators.map((m) => (
                         <span
                           key={m}
-                          className="px-2 py-0.5 rounded-md bg-secondary/60 text-foreground/80 text-[10px] tracking-[0.14em] border border-border font-mono"
+                          className="px-2 py-0.5 rounded-md bg-secondary/60 text-foreground/80 text-[10px] tracking-[0.14em] border border-border"
                         >
                           {m}
                         </span>
@@ -125,19 +137,26 @@ export function OperatorList() {
                   <div className="col-span-2 flex justify-end">
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full border text-[10px] tracking-[0.2em] ${status.cls}`}
+                      title={op.status === "attack"
+                        ? "1 mitigador único cobrindo ≥80% — pode ser ataque OU configuração intencional. Análise estatística."
+                        : undefined}
                     >
                       {status.text}
                     </span>
                   </div>
                 </div>
 
-                {/* Mobile card */}
                 <div className="md:hidden px-4 py-4 space-y-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium tracking-wide truncate">{op.name}</p>
-                      <p className="text-[10px] tracking-[0.16em] text-muted-foreground truncate mt-0.5">
-                        {op.ix}
+                      <p className="font-medium tracking-wide truncate flex items-center gap-2">
+                        {op.name}
+                        {op.hasMixedMitigator && (
+                          <span title="Mitigador misto"><AlertTriangle className="h-3 w-3 text-accent" /></span>
+                        )}
+                      </p>
+                      <p className="text-[10px] tracking-[0.16em] text-muted-foreground truncate mt-0.5 font-mono">
+                        AS{op.asn} · {op.estado || "—"}
                       </p>
                     </div>
                     <span
@@ -149,12 +168,12 @@ export function OperatorList() {
 
                   <div className="flex flex-wrap gap-1">
                     {op.mitigators.length === 0 ? (
-                      <span className="text-muted-foreground/50 text-xs">Sem ASNs mitigadores</span>
+                      <span className="text-muted-foreground/50 text-xs">Sem mitigadores no path</span>
                     ) : (
                       op.mitigators.map((m) => (
                         <span
                           key={m}
-                          className="px-2 py-0.5 rounded-md bg-secondary/60 text-foreground/80 text-[10px] tracking-[0.14em] border border-border font-mono"
+                          className="px-2 py-0.5 rounded-md bg-secondary/60 text-foreground/80 text-[10px] tracking-[0.14em] border border-border"
                         >
                           {m}
                         </span>

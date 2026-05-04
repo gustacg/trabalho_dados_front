@@ -1,7 +1,6 @@
 /**
  * Hook: useScan
- * Orquestra POST /api/scan + SSE /api/scan/{id}/progress
- * Retorna estado do scan e funções de controle.
+ * POST /api/scan + SSE /api/scan/{id}/progress (refundação: escopo em vez de IXs).
  */
 import { useCallback, useRef, useState } from "react";
 import { startScan, subscribeToProgress } from "@/lib/api";
@@ -11,9 +10,11 @@ export interface ScanState {
   scanning: boolean;
   snapshotId: number | null;
   progress: ProgressEvent | null;
-  totalOperadoras: number;
+  totalCandidates: number;
   done: boolean;
   error: string | null;
+  escopo: string | null;
+  mitigadorAtual: string | null;
 }
 
 export function useScan() {
@@ -21,16 +22,15 @@ export function useScan() {
     scanning: false,
     snapshotId: null,
     progress: null,
-    totalOperadoras: 0,
+    totalCandidates: 0,
     done: false,
     error: null,
+    escopo: null,
+    mitigadorAtual: null,
   });
-
   const cleanupRef = useRef<(() => void) | null>(null);
 
-  const iniciarScan = useCallback(async (ixs: string[], nome?: string) => {
-    if (ixs.length === 0) return;
-
+  const iniciarScan = useCallback(async (escopo: string) => {
     setState((s) => ({
       ...s,
       scanning: true,
@@ -38,21 +38,25 @@ export function useScan() {
       error: null,
       progress: null,
       snapshotId: null,
+      escopo,
+      mitigadorAtual: null,
     }));
 
     try {
-      const result = await startScan(ixs, nome);
-
-      setState((s) => ({
-        ...s,
-        snapshotId: result.snapshot_id,
-        totalOperadoras: result.total_operadoras,
-      }));
+      const result = await startScan(escopo);
+      setState((s) => ({ ...s, snapshotId: result.snapshot_id }));
 
       const cleanup = subscribeToProgress(
         result.snapshot_id,
         (data: ProgressEvent) => {
-          setState((s) => ({ ...s, progress: data }));
+          setState((s) => {
+            const next: ScanState = { ...s, progress: data };
+            if (data.count !== undefined && data.asn === undefined && data.mitigador === undefined) {
+              next.totalCandidates = data.count;
+            }
+            if (data.mitigador) next.mitigadorAtual = data.mitigador;
+            return next;
+          });
         },
         (_data: DoneEvent) => {
           setState((s) => ({
@@ -62,15 +66,14 @@ export function useScan() {
             progress: null,
           }));
         },
-        () => {
+        (msg) => {
           setState((s) => ({
             ...s,
             scanning: false,
-            error: "Conexão com o servidor perdida.",
+            error: msg ?? "Conexão com o servidor perdida.",
           }));
         }
       );
-
       cleanupRef.current = cleanup;
     } catch (err) {
       setState((s) => ({

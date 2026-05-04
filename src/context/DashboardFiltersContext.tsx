@@ -25,7 +25,7 @@ const statusRank: Record<OperatorStatus, number> = { attack: 0, none: 1, normal:
 
 interface ProviderProps {
   children: ReactNode;
-  /** Operadoras reais vindas da API — sobrescreve o mockData se fornecido */
+  /** ASNs descobertos (operators reais) — sobrescreve o mock */
   operators?: Operator[];
 }
 
@@ -47,16 +47,18 @@ export function DashboardFiltersProvider({ children, operators }: ProviderProps)
   };
 
   const filtered = useMemo(() => {
-    // usa operators prop (reais) se disponível, senão importa o mock
-    const allOperators = operators ?? [];
+    const all = operators ?? [];
     const q = search.trim().toLowerCase();
-    let list = allOperators.filter((o) => {
-      if (ix !== "ALL" && o.ix !== ix) return false;
+    let list = all.filter((o) => {
+      // Filtro IX por estado: IX Maranhão → MA, IX Ceará → CE
+      if (ix === "IX Maranhão" && (o.estado || "") !== "MA") return false;
+      if (ix === "IX Ceará" && (o.estado || "") !== "CE") return false;
       if (statuses.length && !statuses.includes(o.status)) return false;
       if (q) {
         const inName = o.name.toLowerCase().includes(q);
-        const inAsn = o.mitigators.some((m) => m.toLowerCase().includes(q));
-        if (!inName && !inAsn) return false;
+        const inMit = o.mitigators.some((m) => m.toLowerCase().includes(q));
+        const inAsn = String(o.asn ?? "").includes(q);
+        if (!inName && !inMit && !inAsn) return false;
       }
       return true;
     });
