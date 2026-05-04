@@ -47,6 +47,7 @@ export function subscribeToProgress(
   es.addEventListener("progress", (e) => onProgress(JSON.parse((e as MessageEvent).data)));
   es.addEventListener("snapshot", (e) => onProgress(JSON.parse((e as MessageEvent).data)));
   es.addEventListener("discover", (e) => onProgress(JSON.parse((e as MessageEvent).data)));
+  es.addEventListener("enrich_progress", (e) => onProgress(JSON.parse((e as MessageEvent).data)));
   es.addEventListener("candidates", (e) => onProgress(JSON.parse((e as MessageEvent).data)));
   es.addEventListener("done", (e) => {
     onDone(JSON.parse((e as MessageEvent).data));

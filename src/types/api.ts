@@ -145,6 +145,7 @@ export interface ProgressEvent {
   // discovery events
   mitigador?: string;
   count?: number;
+  encontrados?: number;
   // snapshot event
   id?: number;
   escopo?: string;

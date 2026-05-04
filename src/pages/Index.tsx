@@ -235,25 +235,83 @@ export default function Index() {
         <section className="relative flex flex-col items-center gap-6 sm:gap-8 md:gap-10">
           <ScanStatusBar scanning={scan.scanning} done={scan.done} hours={hours} setHours={setHours} />
 
-          {scan.scanning && scan.progress && (
-            <div className="w-full max-w-md space-y-1.5">
-              <div className="flex justify-between text-[10px] tracking-[0.18em] text-muted-foreground">
-                <span className="truncate">
-                  {scan.progress.asn ? `AS${scan.progress.asn}` : scan.mitigadorAtual ?? "Descobrindo candidatos…"}
-                </span>
-                <span className="tabular-nums shrink-0">
-                  {scan.progress.current ?? "-"}/{scan.progress.total ?? scan.totalCandidates}
-                </span>
+          {scan.scanning && (
+            <div className="w-full max-w-md space-y-4">
+              {/* Fase 1 — Descoberta */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-[10px] tracking-[0.18em] text-muted-foreground">
+                  <span className="text-[9px] tracking-[0.28em] uppercase opacity-50">
+                    {scan.scanPhase === "discovering"
+                      ? "Vizinhos BGP"
+                      : scan.scanPhase === "enriching"
+                      ? "Geo-enriquecimento"
+                      : "Fase 1 · Descoberta"}
+                  </span>
+                  <span className="tabular-nums shrink-0">
+                    {scan.discovery
+                      ? `${scan.discovery.current}/${scan.discovery.total}`
+                      : scan.scanPhase === "collecting" || scan.scanPhase === "done"
+                      ? `${scan.totalCandidates} candidatos`
+                      : ""}
+                  </span>
+                </div>
+                <div className="h-1 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className="h-full bg-accent transition-all duration-300"
+                    style={{
+                      width:
+                        scan.scanPhase === "collecting" || scan.scanPhase === "done"
+                          ? "100%"
+                          : scan.discovery?.total
+                          ? `${(scan.discovery.current / scan.discovery.total) * 100}%`
+                          : "4%",
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] text-muted-foreground/70 font-mono">
+                  <span className="truncate">
+                    {scan.scanPhase === "discovering" && scan.discovery
+                      ? scan.discovery.mitigador ?? `AS${scan.discovery.asn}`
+                      : scan.scanPhase === "enriching" && scan.discovery
+                      ? `AS${scan.discovery.asn}`
+                      : scan.scanPhase === "collecting" || scan.scanPhase === "done"
+                      ? "Concluída"
+                      : "Iniciando…"}
+                  </span>
+                  {scan.scanPhase === "enriching" && scan.discovery?.encontrados !== undefined && (
+                    <span className="shrink-0 ml-2 not-italic text-accent">
+                      {scan.discovery.encontrados} encontrados
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="h-1 rounded-full bg-secondary overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-300"
-                  style={{
-                    width: scan.progress.total
-                      ? `${((scan.progress.current ?? 0) / scan.progress.total) * 100}%`
-                      : "10%",
-                  }}
-                />
+
+              {/* Fase 2 — Coleta BGP */}
+              <div
+                className="space-y-1 transition-opacity duration-500"
+                style={{ opacity: scan.scanPhase === "collecting" || scan.scanPhase === "done" ? 1 : 0.3 }}
+              >
+                <div className="flex justify-between text-[10px] tracking-[0.18em] text-muted-foreground">
+                  <span className="text-[9px] tracking-[0.28em] uppercase opacity-50">Fase 2 · Coleta BGP</span>
+                  <span className="tabular-nums shrink-0">
+                    {scan.collection ? `${scan.collection.current}/${scan.collection.total}` : ""}
+                  </span>
+                </div>
+                <div className="h-1 rounded-full bg-secondary overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-300"
+                    style={{
+                      width: scan.collection
+                        ? `${(scan.collection.current / Math.max(scan.collection.total, 1)) * 100}%`
+                        : "0%",
+                    }}
+                  />
+                </div>
+                <div className="text-[10px] text-muted-foreground/70 font-mono">
+                  {scan.collection
+                    ? `AS${scan.collection.asn}`
+                    : "Aguardando fase 1…"}
+                </div>
               </div>
             </div>
           )}
