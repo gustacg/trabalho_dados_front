@@ -1,11 +1,10 @@
 interface Props {
   label: string;
-  count: number;
   active: boolean;
   onToggle: () => void;
 }
 
-export function IxTargetCard({ label, count, active, onToggle }: Props) {
+export function IxTargetCard({ label, active, onToggle }: Props) {
   return (
     <button
       onClick={onToggle}
@@ -17,9 +16,6 @@ export function IxTargetCard({ label, count, active, onToggle }: Props) {
     >
       <div className="text-left min-w-0">
         <p className="text-sm tracking-[0.08em] truncate">{label}</p>
-        <p className="text-[10px] tracking-[0.2em] text-muted-foreground mt-0.5 truncate">
-          {count} operadoras
-        </p>
       </div>
       <span
         className={`ml-auto h-2 w-2 rounded-full transition-all shrink-0 ${

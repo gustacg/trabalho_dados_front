@@ -265,19 +265,16 @@ export default function Index() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 flex-wrap w-full max-w-md sm:w-auto sm:max-w-none">
             <IxTargetCard
               label="Escopo: MA"
-              count={1}
               active={escopoSelecionado === "MA"}
               onToggle={() => setEscopoSelecionado("MA")}
             />
             <IxTargetCard
               label="Escopo: CE"
-              count={1}
               active={escopoSelecionado === "CE"}
               onToggle={() => setEscopoSelecionado("CE")}
             />
             <IxTargetCard
               label="Escopo: MA+CE"
-              count={2}
               active={escopoSelecionado === "MA+CE"}
               onToggle={() => setEscopoSelecionado("MA+CE")}
             />
