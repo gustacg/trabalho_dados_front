@@ -200,7 +200,9 @@ function Dashboard({
 export default function Index() {
   const [escopoSelecionado, setEscopoSelecionado] = useState<"MA" | "CE" | "MA+CE">("MA+CE");
   const [hours, setHours] = useState(1);
-  const [viewMode, setViewMode] = useState<ViewMode>("latest");
+  // Default "all" — agrega todas as coletas para evitar a tela vazia quando
+  // a última coleta vem com 0 obs (cenário pré-fix dashboard-zero-data).
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [selectedMit, setSelectedMit] = useState<{ asn: number; nome: string } | null>(null);
 
   const { state: scan, iniciarScan, cancelarScan } = useScan();
