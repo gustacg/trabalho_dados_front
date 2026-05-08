@@ -101,9 +101,48 @@ export interface TemporalDelta {
   status_atual: AttackStatus;
   delta_pct: number;
   delta_qtd_mitigadores: number;
+  delta_total_24?: number;
+  delta_com_mitigador?: number;
+  total_24_atual?: number;
+  pct_mitigado_atual?: number;
+  atual_em?: string;
+  anterior_em?: string;
   nome_holder?: string | null;
   estado?: string | null;
   regiao?: string | null;
+}
+
+export interface EngenhariaTrafego {
+  snapshot_id: number;
+  asn_origem: number;
+  total_obs: number;
+  com_prepending: number;
+  mit_transit_origem: number;
+  com_blackhole: number;
+  as_path_avg: number | null;
+  as_path_min: number | null;
+  as_path_max: number | null;
+  as_path_stddev: number | null;
+  pct_prepending: number | null;
+  pct_mit_transit_origem: number | null;
+  nome_holder?: string | null;
+  estado?: string | null;
+  regiao?: string | null;
+}
+
+export interface PipelineHealth {
+  snapshots_recentes: number;
+  snapshots_com_obs: number;
+  snapshots_zerados: number;
+  snapshots_erro: number;
+  duracao_media_seg: number;
+  duracao_max_seg: number;
+  asns_total: number;
+  asns_sem_pais: number;
+  asns_sem_estado: number;
+  asns_pendentes_refresh: number;
+  pct_sem_geo: number;
+  snapshots?: Snapshot[];
 }
 
 export interface HeatmapEstado {

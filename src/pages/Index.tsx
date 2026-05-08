@@ -13,6 +13,8 @@ import { MitigatorClientsDrawer } from "@/components/dashboard/MitigatorClientsD
 import { TemporalDeltaCard } from "@/components/dashboard/TemporalDeltaCard";
 import { CommunityCatalogCard } from "@/components/dashboard/CommunityCatalogCard";
 import { MapaNordesteCard } from "@/components/dashboard/MapaNordesteCard";
+import { EngenhariaTrafegoCard } from "@/components/dashboard/EngenhariaTrafegoCard";
+import { PipelineHealthCard } from "@/components/dashboard/PipelineHealthCard";
 import {
   DashboardFiltersProvider,
   useDashboardFilters,
@@ -190,6 +192,15 @@ function Dashboard({
         </div>
       </div>
 
+      <div className="grid lg:grid-cols-2 gap-4 sm:gap-5">
+        <div className="min-w-0">
+          <EngenhariaTrafegoCard snapshotId={mode === "all" ? "all" : "latest"} />
+        </div>
+        <div className="min-w-0">
+          <PipelineHealthCard />
+        </div>
+      </div>
+
       <OperatorList />
     </section>
   );
@@ -198,7 +209,7 @@ function Dashboard({
 // ── Página principal ─────────────────────────────────────────────────────────
 
 export default function Index() {
-  const [escopoSelecionado, setEscopoSelecionado] = useState<"MA" | "CE" | "MA+CE">("MA+CE");
+  const [escopoSelecionado, setEscopoSelecionado] = useState<"MA" | "CE" | "MA+CE" | "Nordeste">("MA+CE");
   const [hours, setHours] = useState(1);
   // Default "all" — agrega todas as coletas para evitar a tela vazia quando
   // a última coleta vem com 0 obs (cenário pré-fix dashboard-zero-data).
@@ -337,6 +348,11 @@ export default function Index() {
               label="Escopo: MA+CE"
               active={escopoSelecionado === "MA+CE"}
               onToggle={() => setEscopoSelecionado("MA+CE")}
+            />
+            <IxTargetCard
+              label="Escopo: Nordeste"
+              active={escopoSelecionado === "Nordeste"}
+              onToggle={() => setEscopoSelecionado("Nordeste")}
             />
           </div>
 

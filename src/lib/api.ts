@@ -9,9 +9,11 @@ import type {
   ClientesMitigador,
   CommunityObservada,
   DoneEvent,
+  EngenhariaTrafego,
   HeatmapEstado,
   KpiData,
   MitigadorRef,
+  PipelineHealth,
   ProgressEvent,
   ScanResult,
   Snapshot,
@@ -168,4 +170,19 @@ export async function getStats(snapshotId?: number | "latest" | "all"): Promise<
 
 export async function getMitigadoresRef(): Promise<MitigadorRef[]> {
   return req<MitigadorRef[]>(`/api/mitigadores`);
+}
+
+// ── Engenharia de Tráfego (item D do briefing do professor) ──────────────────
+
+export async function getEngenhariaTrafego(
+  snapshotId?: number | "latest" | "all"
+): Promise<EngenhariaTrafego[]> {
+  const qs = snapshotId !== undefined ? `?snapshot_id=${snapshotId}` : "";
+  return req<EngenhariaTrafego[]>(`/api/engenharia-trafego${qs}`);
+}
+
+// ── Saúde do pipeline ────────────────────────────────────────────────────────
+
+export async function getPipelineHealth(): Promise<PipelineHealth> {
+  return req<PipelineHealth>(`/api/health/pipeline`);
 }
