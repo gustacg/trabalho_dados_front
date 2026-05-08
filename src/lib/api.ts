@@ -13,6 +13,10 @@ import type {
   HeatmapEstado,
   KpiData,
   MitigadorRef,
+  MlFeatureImportance,
+  MlLatest,
+  MlRun,
+  PathSpecificity,
   PipelineHealth,
   ProgressEvent,
   ScanResult,
@@ -185,4 +189,35 @@ export async function getEngenhariaTrafego(
 
 export async function getPipelineHealth(): Promise<PipelineHealth> {
   return req<PipelineHealth>(`/api/health/pipeline`);
+}
+
+// ── Path vs Specificity (item D.3 do briefing) ──────────────────────────────
+
+export async function getPathSpecificity(
+  snapshotId?: number | "latest" | "all"
+): Promise<PathSpecificity[]> {
+  const qs = snapshotId !== undefined ? `?snapshot_id=${snapshotId}` : "";
+  return req<PathSpecificity[]>(`/api/path-specificity${qs}`);
+}
+
+// ── KDD passo 4 — modelos automáticos ───────────────────────────────────────
+
+export async function getMlRuns(
+  algoritmo?: "random_forest" | "kmeans" | "apriori",
+  limit = 20
+): Promise<MlRun[]> {
+  const p = new URLSearchParams();
+  if (algoritmo) p.set("algoritmo", algoritmo);
+  p.set("limit", String(limit));
+  return req<MlRun[]>(`/api/ml/runs?${p}`);
+}
+
+export async function getMlLatest(
+  algoritmo: "random_forest" | "kmeans" | "apriori"
+): Promise<MlLatest> {
+  return req<MlLatest>(`/api/ml/latest/${algoritmo}`);
+}
+
+export async function getMlFeatureImportance(): Promise<MlFeatureImportance> {
+  return req<MlFeatureImportance>(`/api/ml/feature-importance`);
 }

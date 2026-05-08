@@ -207,3 +207,87 @@ export interface ClientesMitigador {
   snapshot_id: number;
   clientes: AgregadoAsn[];
 }
+
+// ── KDD passo 4 — modelos automáticos ───────────────────────────────────────
+
+export interface PathSpecificity {
+  snapshot_id: number;
+  asn_origem: number;
+  total_prefixos: number;
+  path_min: number;
+  path_max: number;
+  path_avg: number | null;
+  path_spread: number;
+  path_stddev: number | null;
+  n_path_curto: number;
+  n_path_longo: number;
+  razao_longo_curto: number | null;
+  n_mit_transit_origem: number;
+  pct_mit_transit_origem: number | null;
+  pct_prepending: number | null;
+  n_blackhole: number;
+  score_manipulacao: number;
+  nome_holder?: string | null;
+  estado?: string | null;
+  regiao?: string | null;
+}
+
+export interface MlRun {
+  id: number;
+  rodado_em: string;
+  algoritmo: "random_forest" | "kmeans" | "apriori";
+  snapshot_ref: number | null;
+  status: "ok" | "error" | "skipped";
+  n_amostras: number | null;
+  features_usadas: string[];
+  hiperparams: Record<string, unknown> | null;
+  metricas: Record<string, unknown> | null;
+  importancias: Record<string, unknown> | null;
+  erro_msg: string | null;
+}
+
+export interface MlClusterAssignment {
+  run_id: number;
+  snapshot_id: number;
+  asn_origem: number;
+  cluster: number;
+  status_real: AttackStatus | null;
+}
+
+export interface MlRule {
+  id: number;
+  run_id: number;
+  antecedents: string;
+  consequents: string;
+  support: number;
+  confidence: number;
+  lift: number;
+}
+
+export interface MlLatestRandomForest {
+  run: MlRun;
+}
+export interface MlLatestKmeans {
+  run: MlRun;
+  clusters: MlClusterAssignment[];
+}
+export interface MlLatestApriori {
+  run: MlRun;
+  rules: MlRule[];
+}
+export interface MlLatestEmpty {
+  algoritmo: string;
+  status: "no_data";
+}
+export type MlLatest =
+  | MlLatestRandomForest
+  | MlLatestKmeans
+  | MlLatestApriori
+  | MlLatestEmpty;
+
+export interface MlFeatureImportance {
+  rodado_em?: string;
+  shap_used?: boolean;
+  status?: "no_data";
+  ranking?: { feature: string; peso: number }[];
+}
