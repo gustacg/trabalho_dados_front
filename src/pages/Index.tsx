@@ -14,12 +14,7 @@ import { TemporalDeltaCard } from "@/components/dashboard/TemporalDeltaCard";
 import { CommunityCatalogCard } from "@/components/dashboard/CommunityCatalogCard";
 import { MapaNordesteCard } from "@/components/dashboard/MapaNordesteCard";
 import { EngenhariaTrafegoCard } from "@/components/dashboard/EngenhariaTrafegoCard";
-import { PipelineHealthCard } from "@/components/dashboard/PipelineHealthCard";
 import { PathSpecificityCard } from "@/components/dashboard/PathSpecificityCard";
-import { MlMetricsCard } from "@/components/dashboard/MlMetricsCard";
-import { MlFeatureImportanceCard } from "@/components/dashboard/MlFeatureImportanceCard";
-import { MlClustersCard } from "@/components/dashboard/MlClustersCard";
-import { MlRulesCard } from "@/components/dashboard/MlRulesCard";
 import {
   DashboardFiltersProvider,
   useDashboardFilters,
@@ -203,27 +198,6 @@ function Dashboard({
         </div>
         <div className="min-w-0">
           <PathSpecificityCard snapshotId={mode === "all" ? "all" : "latest"} />
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-4 sm:gap-5">
-        <div className="min-w-0">
-          <MlMetricsCard />
-        </div>
-        <div className="min-w-0">
-          <MlFeatureImportanceCard />
-        </div>
-        <div className="min-w-0">
-          <MlClustersCard />
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-4 sm:gap-5">
-        <div className="min-w-0">
-          <MlRulesCard />
-        </div>
-        <div className="min-w-0">
-          <PipelineHealthCard />
         </div>
       </div>
 
